@@ -1,15 +1,20 @@
 pipeline {
-    agent { label 'linux' }
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '5')
-    }
-    stages {
-        stage('Scan') {
+        agent none
+        stages {
+          stage("build & SonarQube analysis") {
+            agent any
             steps {
-                withSonarQubeEnv(installationName: 'sq1') {
-                    sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'
-                }
+              withSonarQubeEnv('My SonarQube Server') {
+                sh 'mvn clean package sonar:sonar'
+              }
             }
+          }
+          stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+              }
+            }
+          }
         }
-    }
-}
+      }
