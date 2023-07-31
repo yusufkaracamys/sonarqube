@@ -1,4 +1,8 @@
 node {
+  agent any
+    tools {
+        gradle 8.1 
+    }
   stage('SCM') {
     checkout scm
   }
